@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI and ML Integrated AI-Agent - Vi4 Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b1120;
+            --card-bg: #151f35;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a7b3;
+            --accent-cyan: #06b6d4;
+            --accent-blue: #3b82f6;
+            --border-color: #2d3a54;
+            --note-bg: #10172a;
+            --header-bg: #151f35;
+            --transition-speed: 0.4s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: linear-gradient(135deg, rgba(6, 182, 212, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 2.5rem;
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.15rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1.2rem;
+            align-items: center;
+        }
+
+        .footer-counter {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .logo {
+            font-size: 1.15rem;
+            color: var(--accent-cyan);
+        }
+
+        .logo-link {
+            text-decoration: none;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo-img {
+            height: 36px;
+            width: auto;
+            border-radius: 4px;
+        }
+
+        .btn {
+            background: var(--accent-cyan);
+            color: #000;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background-color: #0ed9f1;
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.25);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            border-color: #405073;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slides-viewport {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 2.2rem 4rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
+            transform: translateY(10px);
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .slide-tag {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .slide h2 {
+            font-size: 2rem;
+            margin-bottom: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.8rem;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .content-single {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        p, li {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.4rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        .card h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 0.6rem;
+            font-size: 1.15rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        th, td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .lecturer-notes {
+            background: var(--note-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 4rem;
+            flex-shrink: 0;
+            max-height: 240px;
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+        }
+
+        .notes-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-cyan);
+        }
+
+        .notes-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .notes-content {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            overflow-y: auto;
+            max-height: 140px;
+            padding-right: 0.5rem;
+        }
+
+        .notes-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notes-content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .notes-content::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .highlight-box {
+            background: rgba(6, 182, 212, 0.05);
+            border-left: 4px solid var(--accent-cyan);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 0.5rem 0;
+        }
+
+        .instructor-signature {
+            grid-template-columns: 280px 1fr;
+            margin-bottom: 2rem;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .profile-photo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .profile-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: top;
+            border: 4px solid var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-identity h3 {
+            font-size: 1.5rem;
+            color: var(--accent-cyan);
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-title {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .profile-certs span {
+            display: inline-block;
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-cyan);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .bio-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .bio-info p {
+            line-height: 1.7;
+        }
+
+        .competency-card h4 {
+            color: var(--accent-blue);
+            font-size: 1.1rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .contact-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            margin-top: 1rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .contact-item svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent-cyan);
+        }
+
+        pre {
+            background: #0d1117;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin-top: 0.5rem;
+        }
+        
+        code {
+            color: #c9d1d9;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        
+        .btn-github {
+            background: #24292e;
+            color: #ffffff;
+            border: 1px solid #444c56;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-github:hover {
+            background: #2f363d;
+            border-color: #586069;
+            color: #ffffff;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 class="logo">
+            <a href="https://vi4academy.com" target="_blank" class="logo-link">
+                <img src="./resources/logo.png" alt="Vi4 Academy Logo" class="logo-img">
+                Vi4 Academy | FastAPI and ML Integrated AI-Agent
+            </a>
+        </h1>
+        <div class="controls">
+            <a href="https://github.com/Vi4Academy-Chennai/FastAPI-and-ML-Integrated-AI-Agent" target="_blank" class="btn btn-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                GitHub Repo
+            </a>
+            <span class="footer-counter" id="slide-counter">Slide 1 of 19</span>
+            <button class="btn btn-secondary" id="prev-btn" onclick="changeSlide(-1)">Previous</button>
+            <button class="btn" id="next-btn" onclick="changeSlide(1)">Next Slide</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="slides-viewport">
+
+            <!-- SLIDE 1: Instructor Profile -->
+            <div class="slide active">
+                <div class="slide-tag">Course Instructor</div>
+                <h2>Meet Your Instructor</h2>
+                <div class="content-grid instructor-signature">
+                    <div class="profile-photo-container">
+                        <img src="./resources/VK.png" alt="Vimalkumar Narasimman Profile Picture" class="profile-photo">
+                        <div class="profile-identity">
+                            <h3>Vimalkumar Narasimman</h3>
+                            <p class="profile-title">Senior Data Architect</p>
+                            <div class="profile-certs"><span>TOGAF 9 Certified</span><span>CSM</span></div>
+                        </div>
+                    </div>
+                    <div class="bio-info">
+                        <p>Dynamic Data & AI Architect with 19+ years of experience designing and architecting enterprise-scale solutions across aerospace, CRM, and banking domains. Proven expertise in Generative AI, Agentic AI, and Prompt Engineering.</p>
+                        <div class="card competency-card">
+                            <h4>Core Competencies</h4>
+                            <ul>
+                                <li><strong>Cloud Transformation:</strong> AWS, Azure, GCP, Palantir's Foundry</li>
+                                <li><strong>AI & ML:</strong> GenAI Integration, Agentic AI, Prompt Engineering, MLOps</li>
+                                <li><strong>Solution Architecture:</strong> TOGAF Framework, Agile & Scrum Methodologies</li>
+                            </ul>
+                        </div>
+                        <div class="contact-card">
+                            <div class="contact-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                n.vimalkumar@hotmail.com
+                            </div>
+                            <div class="contact-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                                Vimalkumar Narasimman
+                            </div>
+                            <div class="contact-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                Chennai, India
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 2: Exec Summary -->
+            <div class="slide">
+                <div class="slide-tag">Executive Summary</div>
+                <h2>Architecture Overview: Bridging LLMs & ML</h2>
+                <div class="content-single">
+                    <p>Why do we connect AI Agents to ML Models?</p>
+                    <ul>
+                        <li><strong>Large Language Models (LLMs):</strong> Exceptional at natural language understanding, extraction, and reasoning, but incapable of precise real-time predictive math on custom datasets[cite: 1].</li>
+                        <li><strong>Machine Learning Models:</strong> Exceptional at numerical calculations, pattern recognition, and predictions (e.g., price estimation), but lack conversational capabilities[cite: 1].</li>
+                        <li><strong>FastAPI:</strong> Acts as the high-performance REST API bridge connecting the LLM Agent to the Predictive ML Model[cite: 1].</li>
+                    </ul>
+                    <div class="card" style="margin-top: 1rem;">
+                        <h3>System Architecture Flow</h3>
+                        <pre><code>[ 1. User Prompt ] ──> "Estimate cost for a 2000 sqft, 3-bed house..."
+         │
+         ▼
+[ 2. AI Agent (Streamlit + OpenAI) ] ──> Extracts parameters into JSON
+         │
+         ▼
+[ 3. REST API Call (FastAPI) ] ──> POST /predict-price
+         │
+         ▼
+[ 4. Predictive ML Model (Scikit-Learn) ] ──> Processes features & returns $385,000
+         │
+         ▼
+[ 5. AI Agent Synthesis ] ──> Combines prediction with tailored financial advice</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 3: Pre-Lecture Task -->
+            <div class="slide">
+                <div class="slide-tag">Preparation</div>
+                <h2>Pre-Lecture Task (Flipped Classroom Model)</h2>
+                <div class="content-single">
+                    <p>Before attending the live session, you must build and test the <strong>AI Agent Front-End Shell</strong> on your local machine[cite: 1].</p>
+                    <div class="card">
+                        <h3>Task Objectives</h3>
+                        <ul>
+                            <li>Set up a local Streamlit chat application[cite: 1].</li>
+                            <li>Configure OpenAI Function Calling schema for property valuation[cite: 1].</li>
+                            <li>Write a temporary "mock" function that simulates a backend ML model[cite: 1].</li>
+                            <li>Verify that the AI Agent correctly asks for missing user inputs before triggering the tool[cite: 1].</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 4: Setup Sequence -->
+            <div class="slide">
+                <div class="slide-tag">Setup</div>
+                <h2>Step-by-Step Setup Sequence</h2>
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>1. Environment Preparation</h3>
+                        <p>Open your terminal or command prompt and install the required dependencies[cite: 1]:</p>
+                        <pre><code>pip install streamlit openai</code></pre>
+                        
+                        <h3 style="margin-top:1rem;">2. Configure API Authentication</h3>
+                        <p>Set your Groq API key in your terminal session[cite: 1]:</p>
+                        <pre><code>export GROQ_API_KEY="your-actual-api-key-here"</code></pre>
+                    </div>
+                    <div class="card">
+                        <h3>3. Create the Shell Script</h3>
+                        <p>Create a new file named <code>agent.py</code> in your working directory and paste the complete Python code provided in Section 4[cite: 1].</p>
+                        
+                        <h3 style="margin-top:1rem;">4. Execute & Verify</h3>
+                        <p>Launch the Streamlit app[cite: 1]:</p>
+                        <pre><code>streamlit run agent.py</code></pre>
+                        <p>Test the interaction by asking for a valuation with specific parameters[cite: 1].</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 5: Code Concepts Breakdown -->
+            <div class="slide">
+                <div class="slide-tag">Code Base</div>
+                <h2>Code Concepts Breakdown</h2>
+                <div class="content-single">
+                    <p>Understanding the fundamental components of the `agent.py` shell script[cite: 1]:</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Code Section</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Mock Tool</strong>[cite: 1]</td>
+                                <td><code>def get_house_price_estimate()</code>[cite: 1]</td>
+                                <td>Simulates a remote predictive backend during testing[cite: 1].</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tool Schema</strong>[cite: 1]</td>
+                                <td><code>tools = [...]</code>[cite: 1]</td>
+                                <td>Teaches the LLM what parameters it must extract from raw text[cite: 1].</td>
+                            </tr>
+                            <tr>
+                                <td><strong>System Prompt</strong>[cite: 1]</td>
+                                <td><code>st.session_state.messages</code>[cite: 1]</td>
+                                <td>Directs the Agent's personality, requirement gathering, and advisory role[cite: 1].</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Two-Step Loop</strong>[cite: 1]</td>
+                                <td><code>response_msg.tool_calls</code>[cite: 1]</td>
+                                <td>Intercepts function execution requests from OpenAI, executes local code, and passes results back for final natural language generation[cite: 1].</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SLIDE 6: Live Session Roadmap -->
+            <div class="slide">
+                <div class="slide-tag">Live Session</div>
+                <h2>Live Session Roadmap</h2>
+                <div class="content-single">
+                    <p>During the upcoming 3-hour session, we will complete the end-to-end integration[cite: 1]:</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phase</th>
+                                <th>Duration</th>
+                                <th>Topic</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Phase 1</strong>[cite: 1]</td>
+                                <td>45 Mins[cite: 1]</td>
+                                <td><strong>ML Model Training:</strong> Train a Scikit-Learn Regression model on real estate data and export it via <code>joblib</code>[cite: 1].</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phase 2</strong>[cite: 1]</td>
+                                <td>60 Mins[cite: 1]</td>
+                                <td><strong>FastAPI Deployment:</strong> Wrap the trained <code>.joblib</code> model inside a FastAPI app exposing a <code>/predict-price</code> POST endpoint with Pydantic data validation[cite: 1].</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phase 3</strong>[cite: 1]</td>
+                                <td>45 Mins[cite: 1]</td>
+                                <td><strong>Agent Tool Integration:</strong> Replace the mock function in <code>agent.py</code> with an HTTP <code>requests.post()</code> call pointing to local FastAPI[cite: 1].</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phase 4</strong>[cite: 1]</td>
+                                <td>30 Mins[cite: 1]</td>
+                                <td><strong>Testing & Q&A:</strong> Full end-to-end system testing and edge-case handling[cite: 1].</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SLIDE 7: API & FastAPI -->
+            <div class="slide">
+                <div class="slide-tag">Backend Integration</div>
+                <h2>What is an API & Why FastAPI?</h2>
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>Understanding APIs</h3>
+                        <p>An <strong>Application Programming Interface (API)</strong> is a software intermediary that allows two separate applications to communicate with each other[cite: 2]. APIs are the backbone of modern web services, mobile app backends, and microservice architectures[cite: 2].</p>
+                    </div>
+                    <div class="card">
+                        <h3>Why FastAPI?</h3>
+                        <ul>
+                            <li><strong>Extremely Fast:</strong> Performs on par with Node.js and Go, making it one of the fastest Python frameworks available, utilizing Starlette and Pydantic[cite: 2].</li>
+                            <li><strong>Fast to Code:</strong> Utilizes Python type hints for excellent editor support and reduced debugging[cite: 2].</li>
+                            <li><strong>Automatic Documentation:</strong> Generates interactive Swagger UI and ReDoc based on your code[cite: 2].</li>
+                            <li><strong>Built-in Async Support:</strong> Natively supports asynchronous programming for handling concurrent requests efficiently[cite: 2].</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 8: FastAPI Basics -->
+            <div class="slide">
+                <div class="slide-tag">FastAPI Mechanics</div>
+                <h2>FastAPI Request Lifecycle & Basics</h2>
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>Request Lifecycle</h3>
+                        <ol>
+                            <li><strong>Client Request:</strong> Client sends an HTTP request[cite: 2].</li>
+                            <li><strong>ASGI Server:</strong> Uvicorn receives the request and passes it to FastAPI[cite: 2].</li>
+                            <li><strong>Routing:</strong> Routes the request to the matching function[cite: 2].</li>
+                            <li><strong>Validation:</strong> Pydantic validates data; instantly returns 422 if invalid[cite: 2].</li>
+                            <li><strong>Execution:</strong> Python function runs its logic[cite: 2].</li>
+                            <li><strong>Serialization:</strong> Returned data converts to JSON automatically[cite: 2].</li>
+                        </ol>
+                    </div>
+                    <div class="card">
+                        <h3>Request Parameters</h3>
+                        <ul>
+                            <li><strong>Path Parameters:</strong> Variables embedded in the URL (e.g., <code>/users/{user_id}</code>)[cite: 2].</li>
+                            <li><strong>Query Parameters:</strong> Key-value pairs attached to the end of the URL (e.g., <code>?limit=10</code>)[cite: 2].</li>
+                            <li><strong>Request Body:</strong> JSON data parsed via Pydantic <code>BaseModel</code>[cite: 2].</li>
+                            <li><strong>Response Types:</strong> Status Codes, Response Models, or Custom Responses[cite: 2].</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 9: Simple FastAPI Setup -->
+            <div class="slide">
+                <div class="slide-tag">FastAPI Implementation</div>
+                <h2>Simple FastAPI Setup & Testing</h2>
+                <div class="content-single">
+                    <p>Initialize a simple application demonstrating path parameters, query parameters, and a request body[cite: 2].</p>
+                    <div class="card">
+                        <pre><code>from fastapi import FastAPI, status
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class Item(BaseModel):
+    name: str
+    price: float
+
+@app.post("/items/", status_code=status.HTTP_201_CREATED)
+def create_item(item: Item):
+    return {"item_name": item.name, "status": "Item created successfully"}</code></pre>
+                        <p style="margin-top: 1rem;">To run the API locally, execute: <code>fastapi dev main.py</code>[cite: 2]. Test the interactive docs by visiting <code>http://127.0.0.1:8000/docs</code>[cite: 2].</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 10: Data Ingestion & Cleansing -->
+            <div class="slide">
+                <div class="slide-tag">ML Pipeline Part 1</div>
+                <h2>Data Engineering: Ingestion & Cleansing</h2>
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>1. Data Ingestion</h3>
+                        <p>Importing and loading raw data from an external source into a system where it can be analyzed[cite: 4].</p>
+                        <pre><code>import pandas as pd
+df = pd.read_csv('housing_data.csv')</code></pre>
+                    </div>
+                    <div class="card">
+                        <h3>2. Data Cleansing</h3>
+                        <p>Identifying and correcting errors, handling missing values, and removing duplicates to ensure the dataset is accurate and reliable[cite: 4].</p>
+                        <pre><code># Drop duplicates
+df = df.drop_duplicates(...)
+# Handle missing values
+median_age = df['age_years'].median()
+df['age_years'] = df['age_years'].fillna(median_age)
+df = df.dropna(subset=['price'])</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 11: Wrangling, EDA, FE, and FS -->
+            <div class="slide">
+                <div class="slide-tag">ML Pipeline Part 2</div>
+                <h2>Wrangling, EDA, FE, and FS</h2>
+                <div class="content-single">
+                    <p>Transforming and mapping data from its raw format into a structural format appropriate for downstream analysis[cite: 4].</p>
+                </div>
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>Data Wrangling & EDA</h3>
+                        <ul>
+                            <li><strong>Wrangling:</strong> Filtering rows (<code>df['area'] > 1600</code>) and altering types[cite: 4].</li>
+                            <li><strong>EDA:</strong> Exploratory Data Analysis summarizes main characteristics to find patterns or relationships[cite: 4].</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Feature Engineering & Selection</h3>
+                        <ul>
+                            <li><strong>FE:</strong> Creating new, meaningful input variables (e.g., <code>price_per_sqft</code>)[cite: 4].</li>
+                            <li><strong>FS:</strong> Selecting the most relevant features to use in model construction, reducing overfitting[cite: 4].</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 12: What is Machine Learning? -->
+            <div class="slide">
+                <div class="slide-tag">Machine Learning</div>
+                <h2>What is Machine Learning (ML)?</h2>
+                <div class="content-single">
+                    <p>Machine Learning is a subset of AI that focuses on building systems that learn from data. Instead of explicitly programming a computer, you feed it data and allow algorithms to discover patterns[cite: 4].</p>
+                    <div class="card" style="margin-top:1rem;">
+                        <h3>Types of Machine Learning[cite: 4]</h3>
+                        <ul>
+                            <li><strong>Supervised Learning:</strong> The model is trained on labeled data (input-output pairs) to learn the mapping and predict outputs for unseen inputs (e.g., predicting house prices)[cite: 4].</li>
+                            <li><strong>Unsupervised Learning:</strong> The model is given unlabeled data and must find hidden structures or groupings on its own (e.g., customer segmentation)[cite: 4].</li>
+                            <li><strong>Reinforcement Learning:</strong> An agent learns to make decisions by performing actions in an environment to maximize a reward[cite: 4].</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 13: Linear Regression -->
+            <div class="slide">
+                <div class="slide-tag">Machine Learning</div>
+                <h2>Linear Regression in Detail</h2>
+                <div class="content-grid">
+                    <div>
+                        <p>Linear Regression is a fundamental <strong>Supervised Learning</strong> algorithm used for predicting a continuous numerical value[cite: 4]. It assumes a linear relationship between input variables ($X$) and the target output ($y$)[cite: 4].</p>
+                        <br>
+                        <p><strong>The Equation:</strong> $$y = mx + b$$[cite: 4]</p>
+                        <ul>
+                            <li>$y$ is the predicted output[cite: 4].</li>
+                            <li>$x$ is the input feature[cite: 4].</li>
+                            <li>$m$ is the slope (weight)[cite: 4].</li>
+                            <li>$b$ is the y-intercept (bias)[cite: 4].</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Scikit-Learn Implementation[cite: 4]</h3>
+                        <pre><code>from sklearn.linear_model import LinearRegression
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(...)
+
+# Initialize & Train
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Predict & Evaluate
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 14: Core AI Agent Architecture -->
+            <div class="slide">
+                <div class="slide-tag">Agentic AI Part 1</div>
+                <h2>Core AI Agent Architecture</h2>
+                <div class="content-single">
+                    <p>An <strong>AI Agent</strong> is an autonomous system that uses an LLM as its reasoning engine to perceive intent, plan actions, interact with external tools, and achieve a goal[cite: 6].</p>
+                </div>
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>The Agent Lifecycle[cite: 6]</h3>
+                        <ol>
+                            <li><strong>Perception:</strong> Reads user input and history[cite: 6].</li>
+                            <li><strong>Reasoning:</strong> Evaluates if it needs tools[cite: 6].</li>
+                            <li><strong>Action:</strong> Emits structured tool calls[cite: 6].</li>
+                            <li><strong>Observation:</strong> Ingests external tool data[cite: 6].</li>
+                            <li><strong>Synthesis:</strong> Produces a natural-language response[cite: 6].</li>
+                        </ol>
+                    </div>
+                    <div class="card">
+                        <h3>OpenAI Client SDK[cite: 6]</h3>
+                        <p>The <code>openai</code> Python SDK serves as an industry-standard interface. It can be pointed to alternate infrastructures like Groq for high-speed LPU inference[cite: 6].</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 15: Tool Integration -->
+            <div class="slide">
+                <div class="slide-tag">Agentic AI Part 2</div>
+                <h2>Tool Function vs. Schema & The Two-Step Cycle</h2>
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>Schema vs. Execution</h3>
+                        <ul>
+                            <li><strong>Tool Schema:</strong> Defines <em>what</em> functions exist and their parameters. The LLM never executes Python code directly; it outputs JSON conforming to this schema[cite: 6].</li>
+                            <li><strong>Tool Function:</strong> The actual Python code in your environment that performs the network request or database query[cite: 6].</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Two-Step Cycle[cite: 6]</h3>
+                        <p><strong>Turn 1:</strong> Pass user messages + tools. LLM returns a <code>tool_calls</code> object instead of text[cite: 6].</p>
+                        <p><strong>Execution:</strong> Script executes the Python function[cite: 6].</p>
+                        <p><strong>Turn 2:</strong> Pass prompt + <code>tool_calls</code> + tool output back to the LLM. LLM synthesizes the final text response[cite: 6].</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 16: UI & Serving Architecture -->
+            <div class="slide">
+                <div class="slide-tag">Agentic AI Part 3</div>
+                <h2>UI & Serving Architecture</h2>
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>Streamlit Concepts</h3>
+                        <ul>
+                            <li><strong>Execution Model:</strong> Runs the script top-to-bottom every time a widget is interacted with[cite: 6].</li>
+                            <li><strong>st.session_state:</strong> Persistent key-value store across reruns to preserve conversation memory[cite: 6].</li>
+                            <li><strong>st.chat_message:</strong> Built-in chat interface elements[cite: 6].</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Why FastAPI Here?</h3>
+                        <p>Instead of placing the Scikit-Learn model directly in Streamlit, it is isolated in FastAPI for[cite: 6]:</p>
+                        <ul>
+                            <li><strong>Separation of Concerns:</strong> ML inference isolated from UI[cite: 6].</li>
+                            <li><strong>Independent Scalability:</strong> ML server can scale on GPUs[cite: 6].</li>
+                            <li><strong>Strict Validation:</strong> Leveraging Pydantic[cite: 6].</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 17: Backend Code Walkthrough -->
+            <div class="slide">
+                <div class="slide-tag">Code Walkthrough Part 1</div>
+                <h2>Step-by-Step: Model & FastAPI Backend</h2>
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>1. Model Training & Export[cite: 6]</h3>
+                        <p><code>house_price_model.py</code> fits a RandomForestRegressor on synthetic data and uses <code>joblib.dump()</code> to serialize the weights so they can be loaded without retraining[cite: 6].</p>
+                    </div>
+                    <div class="card">
+                        <h3>2. FastAPI Inference Service[cite: 6]</h3>
+                        <p><code>fast_api.py</code> loads the serialized model into memory at boot and defines a Pydantic schema to strictly validate the five input parameters before calling <code>model.predict()</code>[cite: 6].</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 18: Frontend Code Walkthrough -->
+            <div class="slide">
+                <div class="slide-tag">Code Walkthrough Part 2</div>
+                <h2>Step-by-Step: Streamlit AI Agent</h2>
+                <div class="content-single">
+                    <p><code>AI_Agent.py</code> orchestrates the interaction[cite: 6]:</p>
+                    <div class="card">
+                        <ul>
+                            <li><strong>Tool Handler:</strong> Python packages arguments into a JSON payload and makes a <code>requests.post</code> call to the local FastAPI server[cite: 6].</li>
+                            <li><strong>Interaction Loop:</strong> Prompt added to <code>session_state.messages</code>. Agent checks if all required schema parameters are met. If met, the LLM emits a tool call[cite: 6].</li>
+                            <li><strong>Synthesis:</strong> The tool output is appended under the <code>tool</code> role, and a second API call occurs to translate raw numerical output into a complete advisory response[cite: 6].</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 19: Q&A -->
+            <div class="slide">
+                <div class="slide-tag">Conclusion</div>
+                <h2>Questions & Discussion</h2>
+                <div class="content-single" style="text-align: center; margin-top: 2.5rem;">
+                    <h3 style="color: var(--accent-cyan); font-size: 1.8rem; margin-bottom: 0.8rem;">Let's Build the Future</h3>
+                    <p>Thank you for attending! Open for technical questions, code walkthroughs, and architecture debates.</p>
+                    <br>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">Access resources and code at <a href="https://github.com/Vi4Academy-Chennai/FastAPI-and-ML-Integrated-AI-Agent" target="_blank" style="color: var(--accent-cyan); text-decoration: underline;">Vi4Academy-Chennai/FastAPI-and-ML-Integrated-AI-Agent</a> or visit <a href="https://vi4academy.com" target="_blank" style="color: var(--accent-cyan); text-decoration: underline;">Vi4 Academy</a>.</p>
+                    <br>
+                    <p class="footer-counter">
+                        Vi4 Academy Educational Platform — Department of Computer Science
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- LECTURER NOTES PANEL -->
+        <div class="lecturer-notes">
+            <div class="notes-header">
+                <span class="notes-title" id="notes-title-indicator">Notes (Slide 1)</span>
+                <button class="notes-toggle" onclick="toggleNotesSize()">Collapse Notes ↕</button>
+            </div>
+            <div class="notes-content" id="notes-text">
+                [Hook]: Good morning everyone! Welcome to Vi4 Academy's master lecture. I'm Vimalkumar Narasimman, and I'll be your instructor for this deep dive into Autonomous AI Agents.
+                [Context]: I have over 18 years of experience designing and architecting enterprise-scale solutions across various domains. Today, we embark on a comprehensive 2-hour deep dive into Autonomous AI Agents. We will build from absolute ground-up foundations all the way to production-grade engineering.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('slide-counter');
+        const notesText = document.getElementById('notes-text');
+        const notesTitle = document.getElementById('notes-title-indicator');
+        const notesPanel = document.querySelector('.lecturer-notes');
+        
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        const lecturerScripts = [
+            /* Slide 1 - Profile */
+            `[Hook]: Good morning everyone! Welcome to Vi4 Academy's master lecture. I'm Vimalkumar Narasimman, and I'll be your instructor for this deep dive into Autonomous AI Agents.
+             [Context]: I have over 18 years of experience designing and architecting enterprise-scale solutions across various domains. Today, we embark on a comprehensive deep dive into Autonomous AI Agents.`,
+
+            /* Slide 2 - Architecture Overview */
+            `Let's look at the architecture. Large Language Models excel at reasoning, but struggle with precise math[cite: 1]. ML models excel at predictions but lack conversational abilities[cite: 1]. FastAPI acts as the high-performance REST bridge connecting them[cite: 1].`,
+            
+            /* Slide 3 - Pre-Lecture Task */
+            `Before the live session, you need to build the AI Agent Front-End Shell locally[cite: 1]. This involves setting up Streamlit, configuring the OpenAI schema, and writing mock functions to verify inputs[cite: 1].`,
+            
+            /* Slide 4 - Setup Sequence */
+            `The setup sequence is straightforward. First, prepare your environment by installing Streamlit and OpenAI via pip[cite: 1]. Then, export your Groq API key, create the shell script agent.py, and launch the server[cite: 1].`,
+            
+            /* Slide 5 - Code Concepts */
+            `We break the code into key concepts: the Mock Tool simulates the backend during testing, the Tool Schema teaches the LLM what to extract, the System Prompt directs the personality, and the Two-Step Loop intercepts the function execution[cite: 1].`,
+            
+            /* Slide 6 - Live Session Roadmap */
+            `Our live session will span 4 phases over 3 hours: ML Model Training via Scikit-Learn, FastAPI Deployment with Pydantic validation, Agent Tool Integration, and finally, Full End-to-End System Testing[cite: 1].`,
+            
+            /* Slide 7 - API & FastAPI */
+            `An API acts as a software intermediary, allowing applications to communicate[cite: 2]. FastAPI is extremely fast—on par with Go—fast to code using Python type hints, provides automatic documentation, and has built-in async support[cite: 2].`,
+            
+            /* Slide 8 - FastAPI Basics */
+            `The request lifecycle moves from the Client to the ASGI Server, through the Router, is validated by Pydantic, executed in your function, and automatically serialized to JSON[cite: 2]. We map variables using path, query, and request body parameters[cite: 2].`,
+            
+            /* Slide 9 - Simple FastAPI Setup */
+            `Here is a simple FastAPI setup. You can run your API locally using "fastapi dev main.py" and test it instantly via the interactive Swagger UI documentation natively generated at the /docs endpoint[cite: 2].`,
+            
+            /* Slide 10 - Data Ingestion & Cleansing */
+            `Data is the foundation[cite: 4]. We begin with Data Ingestion to load raw files into Pandas, followed by Data Cleansing where we utilize methods like fillna and drop_duplicates to ensure data integrity before modeling[cite: 4].`,
+            
+            /* Slide 11 - Data Wrangling, EDA, FE, FS */
+            `Next, we map the data through Data Wrangling[cite: 4]. We perform Exploratory Data Analysis to find visual patterns, Feature Engineering to create new meaningful variables, and Feature Selection to drop redundant data[cite: 4].`,
+            
+            /* Slide 12 - Machine Learning */
+            `Machine Learning models learn from data autonomously[cite: 4]. We classify them into Supervised Learning using labeled data, Unsupervised Learning for hidden patterns, and Reinforcement Learning for maximizing reward environments[cite: 4].`,
+            
+            /* Slide 13 - Linear Regression */
+            `Linear Regression is a fundamental Supervised Learning algorithm[cite: 4]. It fits a line to the data using the equation y = mx + b to minimize the Mean Squared Error[cite: 4]. We implement this easily using Scikit-Learn[cite: 4].`,
+            
+            /* Slide 14 - AI Agent Architecture */
+            `Moving to the LLM side, an AI Agent is autonomous[cite: 6]. It perceives user intent, reasons, emits tool calls if actions are required, observes the result, and synthesizes a response. We use the standard OpenAI SDK to communicate[cite: 6].`,
+            
+            /* Slide 15 - Tool Function vs Schema */
+            `It's critical to understand that the tool schema is just JSON telling the LLM what exists; the tool function is the actual Python execution[cite: 6]. This requires a two-step cycle: triggering the tool, running it, and synthesizing the tool output[cite: 6].`,
+            
+            /* Slide 16 - UI & Serving Architecture */
+            `We use Streamlit for our frontend UI, which relies heavily on session state for memory[cite: 6]. We decouple the ML model into FastAPI for separation of concerns, independent scalability, and strict Pydantic validation[cite: 6].`,
+            
+            /* Slide 17 - Backend Walkthrough */
+            `Our backend walkthrough involves training a Random Forest Regressor and saving it as a joblib artifact[cite: 6]. We then load it into memory within FastAPI and serve it securely via a POST endpoint[cite: 6].`,
+            
+            /* Slide 18 - Frontend Walkthrough */
+            `On the frontend, Streamlit acts as the orchestrator[cite: 6]. It asks for missing variables, executes the tool via an HTTP requests.post call to FastAPI, and appends the result to the session state for final LLM natural language synthesis[cite: 6].`,
+            
+            /* Slide 19 - Conclusion */
+            `Thank you for attending! Open for technical questions, code walkthroughs, and architecture debates.`
+        ];
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            counter.innerText = `Slide ${currentSlide + 1} of ${totalSlides}`;
+            notesTitle.innerText = `Notes (Slide ${currentSlide + 1})`;
+            notesText.innerHTML = lecturerScripts[currentSlide] || "No specific script provided for this slide.";
+            
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            updateSlide();
+        }
+
+        let isNotesCollapsed = false;
+        function toggleNotesSize() {
+            isNotesCollapsed = !isNotesCollapsed;
+            const content = document.querySelector('.notes-content');
+            const toggleBtn = document.querySelector('.notes-toggle');
+            if (isNotesCollapsed) {
+                content.style.display = 'none';
+                notesPanel.style.maxHeight = '60px';
+                toggleBtn.innerText = 'Expand Notes ↕';
+            } else {
+                content.style.display = 'block';
+                notesPanel.style.maxHeight = '240px';
+                toggleBtn.innerText = 'Collapse Notes ↕';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+                if (currentSlide < totalSlides - 1) changeSlide(1);
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                if (currentSlide > 0) changeSlide(-1);
+            }
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>
